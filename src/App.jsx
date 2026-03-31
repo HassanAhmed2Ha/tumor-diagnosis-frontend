@@ -1,95 +1,127 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-// التعريفات القاموسية للغتين (كما هي بدون تغيير في المحتوى الطبي)
+// --- مكون تحليل التأثير (SHAP Visualizer) ---
+const ShapVisualizer = ({ values, lang, labels }) => {
+  const maxVal = Math.max(...values.map(Math.abs), 0.1); // تجنب القسمة على صفر
+  
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mt-8 p-6 bg-slate-900/50 rounded-2xl border border-slate-700 shadow-inner"
+    >
+      <h4 className="text-center text-teal-400 font-bold mb-6 tracking-widest uppercase text-xs">
+        {lang === 'en' ? 'AI Decision Logic (Feature Impact)' : 'منطق قرار الذكاء الاصطناعي (تأثير الخصائص)'}
+      </h4>
+      
+      <div className="space-y-5">
+        {values.map((val, index) => (
+          <div key={index} className="relative">
+            <div className="flex justify-between text-[10px] mb-1.5 px-1 font-medium">
+              <span className="text-slate-400">{labels[index].label}</span>
+              <span className={val > 0 ? 'text-rose-400' : 'text-emerald-400'} dir="ltr">
+                {val > 0 ? '▲' : '▼'} {(Math.abs(val) * 100).toFixed(1)}%
+              </span>
+            </div>
+            
+            {/* بار الرسم البياني */}
+            <div className="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden flex items-center relative border border-slate-700/50">
+              {/* خط المنتصف الصفرى */}
+              <div className="absolute left-1/2 w-0.5 h-full bg-slate-600 z-10"></div>
+              
+              {/* العمود المتحرك */}
+              <motion.div
+                initial={{ width: 0, left: "50%" }}
+                animate={{ 
+                  width: `${(Math.abs(val) / maxVal) * 50}%`,
+                  left: val > 0 ? "50%" : `${50 - (Math.abs(val) / maxVal) * 50}%`
+                }}
+                transition={{ duration: 1.2, ease: "circOut", delay: index * 0.1 }}
+                className={`h-full rounded-full relative z-0 ${
+                  val > 0 
+                  ? 'bg-gradient-to-r from-rose-600 to-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.3)]' 
+                  : 'bg-gradient-to-l from-emerald-600 to-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)]'
+                }`}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <div className="mt-6 flex justify-between text-[9px] text-slate-500 font-bold uppercase tracking-tighter">
+        <span>{lang === 'en' ? 'Reducing Risk' : 'تقليل احتمالية الإصابة'}</span>
+        <span>{lang === 'en' ? 'Increasing Risk' : 'زيادة احتمالية الإصابة'}</span>
+      </div>
+    </motion.div>
+  );
+};
+
+// --- المكون الرئيسي للتطبيق ---
 const contentEn = {
   brand: "NeuroScan.AI",
   badge: "Research & Diagnostic Tool",
   langBtn: "AR",
   heroTitle: "Breast Cancer Classification Engine",
-  heroDesc: "Enter the clinical cell nuclei features below Our deep learning model analyzes these parameters in real-time to assist in classifying tumors as Benign or Malignant",
-  inputsTitle: "Clinical Inputs",
+  heroDesc: "Analyze clinical cell nuclei features in real-time. Powered by Deep Learning and Explainable AI (SHAP).",
+  inputsTitle: "Clinical Parameters",
   fields: [
-    { id: 'worst_radius', label: 'Worst Radius', desc: 'Mean of distances from center to points on perimeter' },
-    { id: 'worst_texture', label: 'Worst Texture', desc: 'Standard deviation of gray-scale values' },
-    { id: 'worst_concave_points', label: 'Worst Concave Pts', desc: 'Number of concave portions of the contour' },
-    { id: 'worst_area', label: 'Worst Area', desc: 'Total cellular area' },
-    { id: 'worst_concavity', label: 'Worst Concavity', desc: 'Severity of concave portions' }
+    { id: 'worst_radius', label: 'Worst Radius', desc: 'Max cell nuclei radius' },
+    { id: 'worst_texture', label: 'Worst Texture', desc: 'Max gray-scale variation' },
+    { id: 'worst_concave_points', label: 'Worst Concave Pts', desc: 'Max concave contour points' },
+    { id: 'worst_area', label: 'Worst Area', desc: 'Max cell area measured' },
+    { id: 'worst_concavity', label: 'Worst Concavity', desc: 'Max severity of concave portions' }
   ],
-  btnAnalyze: "Run Analysis",
-  btnLoading: "Processing Data...",
-  awaiting: "Awaiting Data",
-  awaitingDesc: "Fill in the required fields and run the analysis to view the AI prediction here",
+  btnAnalyze: "Run Diagnostic Analysis",
+  btnLoading: "AI is Thinking...",
   output: "Diagnostic Output",
   malignant: "Malignant",
   benign: "Benign",
-  confidence: "AI Confidence Level",
-  disclaimer: "Disclaimer This tool is a demonstration of AI capabilities and is not a substitute for professional medical advice diagnosis or treatment",
-  errorMsg: "Connection failed Please check your backend status",
-  footer: "2026 NeuroScan AI Developed by Hassan Ahmed for academic research"
-}
+  confidence: "Prediction Confidence",
+  disclaimer: "For research use only. Not a medical substitute.",
+  footer: "© 2026 NeuroScan AI | Developed by Hassan Ahmed"
+};
 
 const contentAr = {
   brand: "NeuroScan.AI",
   badge: "أداة بحث وتشخيص",
   langBtn: "EN",
   heroTitle: "محرك تصنيف أورام الثدي",
-  heroDesc: "أدخل الخصائص السريرية لأنوية الخلايا بالأسفل يقوم نموذج التعلم العميق الخاص بنا بتحليل هذه المعلمات في الوقت الفعلي للمساعدة في تصنيف الأورام إلى حميدة أو خبيثة",
-  inputsTitle: "المدخلات السريرية",
+  heroDesc: "تحليل الخصائص السريرية لأنوية الخلايا لحظياً. مدعوم بالتعلم العميق والذكاء الاصطناعي التفسيري (SHAP).",
+  inputsTitle: "المعلمات السريرية",
   fields: [
-    { id: 'worst_radius', label: 'الحد الأقصى لنصف القطر', desc: 'متوسط أكبر ثلاث قيم لنصف قطر أنوية الخلايا المرصودة' },
-    { id: 'worst_texture', label: 'الحد الأقصى لتباين النسيج', desc: 'أقصى تباين في تدرج الألوان الرمادية لسطح النواة (مؤشر على خشونة السطح)' },
-    { id: 'worst_concave_points', label: 'الحد الأقصى للنقاط المقعرة', desc: 'أقصى عدد للتعرجات أو النقاط الغائرة على محيط النواة' },
-    { id: 'worst_area', label: 'الحد الأقصى للمساحة', desc: 'متوسط أكبر مساحات تم قياسها لأنوية الخلايا' },
-    { id: 'worst_concavity', label: 'الحد الأقصى للتقعر', desc: 'أقصى شدة أو عمق للتعرجات الغائرة في الغلاف النووي للخلية' }
+    { id: 'worst_radius', label: 'أقصى نصف قطر', desc: 'متوسط أكبر قيم لنصف قطر النواة' },
+    { id: 'worst_texture', label: 'أقصى تباين للنسيج', desc: 'الانحراف المعياري لقيم التدرج الرمادي' },
+    { id: 'worst_concave_points', label: 'أقصى نقاط مقعرة', desc: 'أقصى عدد للتعرجات في محيط النواة' },
+    { id: 'worst_area', label: 'أقصى مساحة', desc: 'أكبر مساحة تم قياسها للخلية' },
+    { id: 'worst_concavity', label: 'أقصى تقعر', desc: 'أقصى عمق للتعرجات في الغلاف النووي' }
   ],
-  btnAnalyze: "تشغيل التحليل",
-  btnLoading: "جاري معالجة البيانات...",
-  awaiting: "في انتظار البيانات",
-  awaitingDesc: "قم بملء الحقول المطلوبة وتشغيل التحليل لعرض تنبؤ الذكاء الاصطناعي هنا",
+  btnAnalyze: "بدء التحليل التشخيصي",
+  btnLoading: "الذكاء الاصطناعي يفكر...",
   output: "نتيجة التشخيص",
-  malignant: "خبيث",
-  benign: "حميد",
-  confidence: "مستوى ثقة الذكاء الاصطناعي",
-  disclaimer: "تنبيه هذه الأداة هي عرض لقدرات الذكاء الاصطناعي وليست بديلا عن الاستشارة الطبية المتخصصة أو التشخيص أو العلاج",
-  errorMsg: "فشل الاتصال يرجى التحقق من حالة الخادم الخاص بك",
-  footer: "2026 NeuroScan AI تم التطوير بواسطة حسن أحمد للبحث الأكاديمي"
-}
+  malignant: "خبيث (Malignant)",
+  benign: "حميد (Benign)",
+  confidence: "ثقة التنبؤ",
+  disclaimer: "لأغراض البحث فقط. ليس بديلاً عن الاستشارة الطبية.",
+  footer: "2026 NeuroScan AI | تم التطوير بواسطة حسن أحمد"
+};
 
 function App() {
-  const [lang, setLang] = useState('en')
-  const [content, setContent] = useState(contentEn)
-  
-  const [formData, setFormData] = useState({
-    worst_radius: '',
-    worst_texture: '',
-    worst_concave_points: '',
-    worst_area: '',
-    worst_concavity: ''
-  })
-
-  const [result, setResult] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [lang, setLang] = useState('en');
+  const [content, setContent] = useState(contentEn);
+  const [formData, setFormData] = useState({ worst_radius: '', worst_texture: '', worst_concave_points: '', worst_area: '', worst_concavity: '' });
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setContent(lang === 'en' ? contentEn : contentAr)
-    document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl'
-  }, [lang])
-
-  const toggleLang = () => {
-    setLang(lang === 'en' ? 'ar' : 'en')
-  }
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+    setContent(lang === 'en' ? contentEn : contentAr);
+    document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
+  }, [lang]);
 
   const analyzeData = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-    setResult(null)
-
+    e.preventDefault();
+    setLoading(true);
+    setResult(null);
     try {
       const response = await fetch('https://hassan2007-tumor-diagnosis-backend.hf.space/predict', {
         method: 'POST',
@@ -101,216 +133,100 @@ function App() {
           worst_area: parseFloat(formData.worst_area),
           worst_concavity: parseFloat(formData.worst_concavity)
         }),
-      })
-
-      if (!response.ok) throw new Error(content.errorMsg)
-      
-      const data = await response.json()
-      setResult(data)
+      });
+      const data = await response.json();
+      setResult(data);
     } catch (err) {
-      setError(content.errorMsg)
+      alert("Error connecting to AI Server");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
-
-  const getConfidenceScore = (prediction, probability) => {
-    const rawScore = prediction === 'Malignant' ? (1 - probability) : probability
-    return (rawScore * 100).toFixed(1)
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-200 font-sans selection:bg-teal-500/30" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-      
-      {/* Navbar with NEW NEURAL NETWORK LOGO */}
-      <nav className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            
-            {/* NEW LOGO CONTAINER */}
-            <div className="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.2)] overflow-hidden p-1.5">
-              {/* Custom Neural Network SVG Icon */}
-              <svg viewBox="0 0 100 100" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Connections (Synapses) */}
-                <path d="M25 35 L50 20" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
-                <path d="M25 35 L50 50" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
-                <path d="M25 65 L50 50" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
-                <path d="M25 65 L50 80" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
-                <path d="M50 20 L75 50" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
-                <path d="M50 50 L75 50" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
-                <path d="M50 80 L75 50" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
-                
-                {/* Nodes (Neurons) - Input Layer */}
-                <circle cx="25" cy="35" r="8" fill="currentColor" className="animate-pulse"/>
-                <circle cx="25" cy="65" r="8" fill="currentColor" className="animate-pulse"/>
-                
-                {/* Nodes (Neurons) - Hidden Layer */}
-                <circle cx="50" cy="20" r="8" fill="#fff" stroke="currentColor" strokeWidth="2"/>
-                <circle cx="50" cy="50" r="8" fill="#fff" stroke="currentColor" strokeWidth="2"/>
-                <circle cx="50" cy="80" r="8" fill="#fff" stroke="currentColor" strokeWidth="2"/>
-                
-                {/* Nodes (Neurons) - Output Layer */}
-                <circle cx="75" cy="50" r="10" fill="currentColor" stroke="#fff" strokeWidth="3"/>
-              </svg>
-            </div>
-            
-            {/* Brand Name */}
-            <h1 className="text-2xl font-bold tracking-wide text-slate-100 flex items-baseline gap-1">
-              NeuroScan<span className="text-teal-400">.AI</span>
-            </h1>
+    <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-teal-500/30">
+      <nav className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400 shadow-lg shadow-teal-500/10">
+            <svg viewBox="0 0 100 100" className="w-7 h-7" fill="none">
+              <path d="M25 35 L50 20 M25 35 L50 50 M25 65 L50 50 M25 65 L50 80 M50 20 L75 50 M50 50 L75 50 M50 80 L75 50" stroke="currentColor" strokeWidth="4" opacity="0.6"/>
+              <circle cx="25" cy="35" r="7" fill="currentColor" /> <circle cx="25" cy="65" r="7" fill="currentColor" />
+              <circle cx="50" cy="20" r="6" fill="#0f172a" stroke="currentColor" strokeWidth="2"/> <circle cx="50" cy="50" r="6" fill="#0f172a" stroke="currentColor" strokeWidth="2"/> <circle cx="50" cy="80" r="6" fill="#0f172a" stroke="currentColor" strokeWidth="2"/>
+              <circle cx="75" cy="50" r="9" fill="currentColor" />
+            </svg>
           </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="hidden md:block text-xs font-medium px-3 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
-              {content.badge}
-            </div>
-            <button 
-              onClick={toggleLang}
-              className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-400 border border-slate-700 transition font-bold text-sm tracking-wider"
-            >
-              {content.langBtn}
-            </button>
-          </div>
+          <h1 className="text-xl font-black text-white uppercase tracking-tighter italic">{content.brand}</h1>
         </div>
+        <button onClick={() => setLang(lang === 'en' ? 'ar' : 'en')} className="px-4 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-teal-400 font-bold hover:bg-slate-700 transition-colors text-xs">
+          {content.langBtn}
+        </button>
       </nav>
 
-      {/* Main Content (Rest of the code remains the same) */}
-      <main className="max-w-7xl mx-auto px-6 py-12 lg:py-20">
-        
-        <div className="max-w-3xl mb-12">
-          <h2 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight text-white">
-            {content.heroTitle}
-          </h2>
-          <p className="text-slate-400 text-lg leading-relaxed">
-            {content.heroDesc}
-          </p>
-        </div>
+      <main className="max-w-6xl mx-auto px-6 py-12 lg:py-16 grid lg:grid-cols-2 gap-12 items-start">
+        <div>
+          <header className="mb-10">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 leading-none uppercase">{content.heroTitle}</h2>
+            <p className="text-slate-400 text-lg">{content.heroDesc}</p>
+          </header>
 
-        <div className="grid lg:grid-cols-12 gap-10">
-          
-          <div className="lg:col-span-7">
-            <div className="bg-slate-800/50 border border-slate-700 rounded-3xl p-8 backdrop-blur-sm shadow-xl">
-              <h3 className="text-xl font-bold mb-6 text-slate-200 border-b border-slate-700 pb-4">
-                {content.inputsTitle}
-              </h3>
-              
-              <form onSubmit={analyzeData} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  
-                  {content.fields.map((field) => (
-                    <div key={field.id} className="group">
-                      <label className="text-sm font-semibold text-slate-300 block mb-1.5 flex flex-col items-start">
-                        <span>{field.label}</span>
-                        <span className="text-[10px] text-slate-500 font-normal opacity-0 group-hover:opacity-100 transition-opacity mt-1">
-                          {field.desc}
-                        </span>
-                      </label>
-                      {/* Updated Input with appearance utilities to hide spin buttons */}
-                      <input
-                        type="number"
-                        step="any"
-                        name={field.id}
-                        value={formData[field.id]}
-                        onChange={handleChange}
-                        placeholder="0"
-                        className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none transition-all shadow-inner [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        required
-                      />
-                    </div>
-                  ))}
-
+          <form onSubmit={analyzeData} className="bg-slate-900/40 border border-slate-800 p-8 rounded-3xl space-y-6 shadow-2xl backdrop-blur-sm">
+            <h3 className="text-sm font-bold text-teal-500 uppercase tracking-widest mb-4">{content.inputsTitle}</h3>
+            <div className="grid md:grid-cols-2 gap-5">
+              {content.fields.map(f => (
+                <div key={f.id} className="group">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase mb-1 block group-hover:text-teal-400 transition-colors">{f.label}</label>
+                  <input
+                    type="number" step="any" required
+                    value={formData[f.id]}
+                    onChange={e => setFormData({...formData, [f.id]: e.target.value})}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    placeholder="0.00"
+                  />
                 </div>
-
-                <div className="pt-4">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full relative group overflow-hidden rounded-xl bg-teal-600 px-6 py-4 font-bold text-white shadow-[0_0_20px_rgba(13,148,136,0.3)] transition-all hover:bg-teal-500 hover:shadow-[0_0_30px_rgba(20,184,166,0.5)] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-                  >
-                    <span className="relative z-10 flex items-center justify-center gap-2">
-                      {loading ? (
-                        <>
-                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          {content.btnLoading}
-                        </>
-                      ) : content.btnAnalyze}
-                    </span>
-                  </button>
-                </div>
-              </form>
+              ))}
             </div>
-          </div>
-
-          <div className="lg:col-span-5 flex flex-col gap-6">
-            
-            {error && (
-              <div className="p-6 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-rose-400 flex items-start gap-3">
-                <div className="text-sm font-medium">{error}</div>
-              </div>
-            )}
-
-            {!result && !error && (
-              <div className="flex-1 bg-slate-800/30 border border-slate-700 border-dashed rounded-3xl p-8 flex flex-col items-center justify-center text-center">
-                <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-4">
-                  <svg className="w-8 h-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                  </svg>
-                </div>
-                <h4 className="text-slate-300 font-bold mb-2">{content.awaiting}</h4>
-                <p className="text-slate-500 text-sm max-w-[250px]">
-                  {content.awaitingDesc}
-                }
-                </p>
-              </div>
-            )}
-
-            {result && (
-              <div className="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-                <div className={`absolute -top-20 -right-20 w-40 h-40 blur-[80px] rounded-full ${result.prediction === 'Malignant' ? 'bg-rose-500/30' : 'bg-emerald-500/30'}`}></div>
-
-                <div className="relative z-10">
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">{content.output}</div>
-                  <div className="flex items-baseline gap-3 mb-6">
-                    <h3 className={`text-4xl font-black ${result.prediction === 'Malignant' ? 'text-rose-400' : 'text-emerald-400'}`}>
-                      {result.prediction === 'Malignant' ? content.malignant : content.benign}
-                    </h3>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">{content.confidence}</span>
-                      <span className="text-white font-bold">{getConfidenceScore(result.prediction, result.probability)}%</span>
-                    </div>
-                    
-                    <div className="w-full bg-slate-900 rounded-full h-3 overflow-hidden border border-slate-700">
-                      <div 
-                        className={`h-full transition-all duration-1500 ease-out rounded-full ${result.prediction === 'Malignant' ? 'bg-gradient-to-r from-rose-600 to-rose-400' : 'bg-gradient-to-r from-emerald-600 to-emerald-400'}`}
-                        style={{ width: `${getConfidenceScore(result.prediction, result.probability)}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  <div className="mt-8 pt-6 border-t border-slate-700">
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      {content.disclaimer}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-          </div>
+            <button disabled={loading} className="w-full bg-teal-600 hover:bg-teal-500 py-4 rounded-xl font-black text-white uppercase tracking-widest shadow-lg shadow-teal-900/20 transition-all active:scale-95 disabled:opacity-50">
+              {loading ? content.btnLoading : content.btnAnalyze}
+            </button>
+          </form>
         </div>
-      </main>
 
-      <footer className="py-8 text-center border-t border-slate-800 text-slate-600 text-sm">
-        <p>{content.footer}</p>
-      </footer>
+        <aside className="sticky top-28">
+          <AnimatePresence mode="wait">
+            {!result ? (
+              <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-[400px] border-2 border-dashed border-slate-800 rounded-3xl flex flex-col items-center justify-center text-center p-10">
+                <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center mb-4 text-slate-700">
+                  <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" /></svg>
+                </div>
+                <h4 className="font-bold text-slate-500 uppercase text-sm mb-2">{content.awaiting}</h4>
+                <p className="text-slate-600 text-xs leading-relaxed max-w-[200px]">{content.awaitingDesc}</p>
+              </motion.div>
+            ) : (
+              <motion.div key="result" initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                <div className={`absolute -top-20 -right-20 w-40 h-40 blur-[100px] rounded-full ${result.prediction === 'Malignant' ? 'bg-rose-500/20' : 'bg-emerald-500/20'}`}></div>
+                <div className="relative z-10">
+                  <div className="text-[10px] font-bold uppercase text-slate-500 mb-2 tracking-widest">{content.output}</div>
+                  <h3 className={`text-5xl font-black mb-6 ${result.prediction === 'Malignant' ? 'text-rose-500' : 'text-emerald-500'}`}>
+                    {result.prediction === 'Malignant' ? content.malignant : content.benign}
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs font-bold uppercase"><span className="text-slate-500">{content.confidence}</span><span className="text-white">{(result.probability < 0.5 ? (1-result.probability)*100 : result.probability*100).toFixed(1)}%</span></div>
+                    <div className="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${(result.probability < 0.5 ? (1-result.probability)*100 : result.probability*100)}%` }} transition={{ duration: 1.5 }} className={`h-full ${result.prediction === 'Malignant' ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+                    </div>
+                  </div>
+                  {/* دمج الـ SHAP هنا */}
+                  <ShapVisualizer values={result.shap_values} lang={lang} labels={content.fields} />
+                  <p className="mt-8 text-[10px] text-slate-600 italic border-t border-slate-800 pt-4">{content.disclaimer}</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </aside>
+      </main>
+      <footer className="py-10 text-center text-[10px] font-bold text-slate-600 uppercase tracking-widest border-t border-slate-900 mt-10">{content.footer}</footer>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
