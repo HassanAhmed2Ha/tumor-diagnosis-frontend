@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+// قاموس اللغات الشامل مع التفسيرات الطبية
 const i18n = {
   en: {
     brand: "NeuroScan.AI",
@@ -7,52 +8,72 @@ const i18n = {
     heroTitle: "Breast Cancer Classification Engine",
     heroDesc: "Enter the clinical cell nuclei features below. Our deep learning model analyzes these parameters in real-time to assist in classifying tumors.",
     inputsTitle: "Clinical Inputs",
+    
+    // Labels
     worstRadius: "Worst Radius",
     worstTexture: "Worst Texture",
     worstConcavePts: "Worst Concave Pts",
     worstArea: "Worst Area",
     worstConcavity: "Worst Concavity",
+    
+    // Medical Descriptions
+    worstRadiusDesc: "Mean of distances from center to points on perimeter for the largest cells.",
+    worstTextureDesc: "Standard deviation of gray-scale values, indicating surface roughness.",
+    worstConcavePtsDesc: "Number of concave portions (indentations) on the cell contour.",
+    worstAreaDesc: "Total cellular area of the most enlarged cells.",
+    worstConcavityDesc: "Severity and depth of concave portions in the cell membrane.",
+    
     btnAnalyze: "Run Analysis",
     btnLoading: "Processing Data...",
     awaiting: "Awaiting Data",
     awaitingDesc: "Fill in the required fields and run the analysis to view the AI prediction here.",
     output: "Diagnostic Output",
     confidence: "AI Confidence Level",
-    disclaimer: "Disclaimer: This tool is a demonstration of AI capabilities and is not a substitute for professional medical advice.",
+    disclaimer: "This tool is a demonstration of AI capabilities and is not a substitute for professional medical advice, diagnosis, or treatment.",
     errorMsg: "Connection failed. Please check your backend status.",
-    footer: "2026 NeuroScan AI. Developed by Hassan Ahmed for academic research.",
+    footer: "© 2026 NeuroScan AI. Developed by Hassan Ahmed for academic research.",
     langBtn: "AR",
     malignant: "Malignant",
     benign: "Benign"
   },
   ar: {
     brand: "NeuroScan.AI",
-    badge: "Translate Badge Here",
-    heroTitle: "Translate Title Here",
-    heroDesc: "Translate Description Here",
-    inputsTitle: "Translate Inputs Title Here",
-    worstRadius: "Translate Radius Here",
-    worstTexture: "Translate Texture Here",
-    worstConcavePts: "Translate Concave Pts Here",
-    worstArea: "Translate Area Here",
-    worstConcavity: "Translate Concavity Here",
-    btnAnalyze: "Translate Button Here",
-    btnLoading: "Translate Loading Here",
-    awaiting: "Translate Awaiting Here",
-    awaitingDesc: "Translate Awaiting Desc Here",
-    output: "Translate Output Here",
-    confidence: "Translate Confidence Here",
-    disclaimer: "Translate Disclaimer Here",
-    errorMsg: "Translate Error Here",
-    footer: "2026 NeuroScan AI. Developed by Hassan Ahmed",
+    badge: "أداة بحث وتشخيص طبي",
+    heroTitle: "نظام تحليل أورام الثدي بالذكاء الاصطناعي",
+    heroDesc: "أدخل الخصائص السريرية لأنوية الخلايا بالأسفل. يقوم نموذج التعلم العميق الخاص بنا بتحليل هذه المعايير في الوقت الفعلي للمساعدة في تصنيف الأورام بدقة.",
+    inputsTitle: "البيانات السريرية للخلايا",
+    
+    // Labels
+    worstRadius: "أكبر نصف قطر (Worst Radius)",
+    worstTexture: "أكثر تباين نسيجي (Worst Texture)",
+    worstConcavePts: "أكثر نقاط مقعرة (Worst Concave Pts)",
+    worstArea: "أكبر مساحة خلوية (Worst Area)",
+    worstConcavity: "أشد تقعر (Worst Concavity)",
+    
+    // Medical Descriptions (التعريف الطبي الدقيق)
+    worstRadiusDesc: "متوسط أكبر مسافات من مركز الخلية إلى محيطها الخارجي، يعكس حجم التضخم الخلوي.",
+    worstTextureDesc: "التباين والانحراف المعياري لدرجات التدرج الرمادي، يعكس مدى خشونة أو تشوه سطح الخلية.",
+    worstConcavePtsDesc: "عدد النقاط الغائرة (المقعرة) على محيط غلاف الخلية، ترتبط عادة بالخلايا السرطانية.",
+    worstAreaDesc: "إجمالي المساحة التي تشغلها أكبر الخلايا حجماً في العينة المسحوبة.",
+    worstConcavityDesc: "مدى عمق وشدة التقعرات في الغلاف الخلوي، الخلية غير المنتظمة دليل خطر.",
+    
+    btnAnalyze: "بدء التحليل واستخراج النتيجة",
+    btnLoading: "جاري معالجة البيانات بالذكاء الاصطناعي...",
+    awaiting: "في انتظار إدخال البيانات",
+    awaitingDesc: "قم بتعبئة الحقول السريرية المطلوبة واضغط على زر التحليل لعرض التقرير التشخيصي هنا.",
+    output: "التقرير التشخيصي",
+    confidence: "مستوى ثقة الذكاء الاصطناعي",
+    disclaimer: "هذه الأداة هي نموذج تجريبي لقدرات الذكاء الاصطناعي في المجال الطبي، ولا تغني بأي شكل عن الاستشارة الطبية المتخصصة والتشخيص المعتمد.",
+    errorMsg: "فشل الاتصال بالخادم. يرجى التأكد من عمل الباك إند.",
+    footer: "© 2026 NeuroScan AI. تم التطوير بواسطة حسن أحمد لأغراض البحث الأكاديمي لمشروع التخرج.",
     langBtn: "EN",
-    malignant: "Translate Malignant Here",
-    benign: "Translate Benign Here"
+    malignant: "خبيث (Malignant)",
+    benign: "حميد (Benign)"
   }
 };
 
 function App() {
-  const [lang, setLang] = useState('en');
+  const [lang, setLang] = useState('ar'); // خليت العربي هو اللغة الافتراضية
   const t = i18n[lang];
 
   const [formData, setFormData] = useState({
@@ -111,12 +132,14 @@ function App() {
   };
 
   return (
+    // تغيير اتجاه الصفحة بالكامل بناءً على اللغة (RTL للعربي و LTR للإنجليزي)
     <div className="min-h-screen bg-slate-900 text-slate-200 font-sans selection:bg-teal-500/30" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       
       <nav className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.2)]">
+              {/* أيقونة تعبر عن الشبكات العصبية والخلايا */}
               <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="18" cy="5" r="3" />
                 <circle cx="6" cy="12" r="3" />
@@ -164,16 +187,21 @@ function App() {
               <form onSubmit={analyzeData} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   
+                  {/* دمجنا الحقول مع الشرح الطبي بتاعها من القاموس */}
                   {[
-                    { id: 'worst_radius', label: t.worstRadius },
-                    { id: 'worst_texture', label: t.worstTexture },
-                    { id: 'worst_concave_points', label: t.worstConcavePts },
-                    { id: 'worst_area', label: t.worstArea },
-                    { id: 'worst_concavity', label: t.worstConcavity }
+                    { id: 'worst_radius', label: t.worstRadius, desc: t.worstRadiusDesc },
+                    { id: 'worst_texture', label: t.worstTexture, desc: t.worstTextureDesc },
+                    { id: 'worst_concave_points', label: t.worstConcavePts, desc: t.worstConcavePtsDesc },
+                    { id: 'worst_area', label: t.worstArea, desc: t.worstAreaDesc },
+                    { id: 'worst_concavity', label: t.worstConcavity, desc: t.worstConcavityDesc }
                   ].map((field) => (
-                    <div key={field.id}>
-                      <label className="text-sm font-semibold text-slate-300 block mb-1.5">
+                    <div key={field.id} className="group relative">
+                      <label className="text-sm font-semibold text-slate-300 block mb-1.5 flex justify-between items-baseline cursor-help">
                         {field.label}
+                        {/* الشرح بيظهر لما تقف بالماوس */}
+                        <span className={`absolute ${lang === 'ar' ? 'right-0' : 'left-0'} -top-10 w-full bg-slate-700 text-xs text-white p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg`}>
+                          {field.desc}
+                        </span>
                       </label>
                       <input
                         type="number"
@@ -229,7 +257,7 @@ function App() {
                   </svg>
                 </div>
                 <h4 className="text-slate-300 font-bold mb-2">{t.awaiting}</h4>
-                <p className="text-slate-500 text-sm max-w-[250px]">
+                <p className="text-slate-500 text-sm max-w-[250px] mx-auto">
                   {t.awaitingDesc}
                 </p>
               </div>
@@ -237,7 +265,7 @@ function App() {
 
             {result && (
               <div className="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-                <div className={`absolute -top-20 -right-20 w-40 h-40 blur-[80px] rounded-full ${result.prediction === 'Malignant' ? 'bg-rose-500/30' : 'bg-emerald-500/30'}`}></div>
+                <div className={`absolute -top-20 ${lang === 'ar' ? '-left-20' : '-right-20'} w-40 h-40 blur-[80px] rounded-full ${result.prediction === 'Malignant' ? 'bg-rose-500/30' : 'bg-emerald-500/30'}`}></div>
 
                 <div className="relative z-10">
                   <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">{t.output}</div>
@@ -253,7 +281,7 @@ function App() {
                       <span className="text-white font-bold">{getConfidenceScore(result.prediction, result.probability)}%</span>
                     </div>
                     
-                    <div className="w-full bg-slate-900 rounded-full h-3 overflow-hidden border border-slate-700">
+                    <div className="w-full bg-slate-900 rounded-full h-3 overflow-hidden border border-slate-700" dir="ltr">
                       <div 
                         className={`h-full transition-all duration-1500 ease-out rounded-full ${result.prediction === 'Malignant' ? 'bg-gradient-to-r from-rose-600 to-rose-400' : 'bg-gradient-to-r from-emerald-600 to-emerald-400'}`}
                         style={{ width: `${getConfidenceScore(result.prediction, result.probability)}%` }}
@@ -263,7 +291,7 @@ function App() {
 
                   <div className="mt-8 pt-6 border-t border-slate-700">
                     <p className="text-xs text-slate-500 leading-relaxed">
-                      <span className="text-amber-500 font-semibold">تنبيه </span> {t.disclaimer}
+                      <span className="text-amber-500 font-semibold">تنبيه: </span> {t.disclaimer}
                     </p>
                   </div>
                 </div>
