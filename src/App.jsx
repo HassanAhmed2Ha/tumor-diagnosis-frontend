@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 
+// التعريفات القاموسية للغتين (كما هي بدون تغيير في المحتوى الطبي)
 const contentEn = {
   brand: "NeuroScan.AI",
   badge: "Research & Diagnostic Tool",
@@ -35,31 +36,11 @@ const contentAr = {
   heroDesc: "أدخل الخصائص السريرية لأنوية الخلايا بالأسفل يقوم نموذج التعلم العميق الخاص بنا بتحليل هذه المعلمات في الوقت الفعلي للمساعدة في تصنيف الأورام إلى حميدة أو خبيثة",
   inputsTitle: "المدخلات السريرية",
   fields: [
-    { 
-      id: 'worst_radius', 
-      label: 'الحد الأقصى لنصف القطر', 
-      desc: 'متوسط أكبر ثلاث قيم لنصف قطر أنوية الخلايا المرصودة' 
-    },
-    { 
-      id: 'worst_texture', 
-      label: 'الحد الأقصى لتباين النسيج', 
-      desc: 'أقصى تباين في تدرج الألوان الرمادية لسطح النواة (مؤشر على خشونة السطح)' 
-    },
-    { 
-      id: 'worst_concave_points', 
-      label: 'الحد الأقصى للنقاط المقعرة', 
-      desc: 'أقصى عدد للتعرجات أو النقاط الغائرة على محيط النواة' 
-    },
-    { 
-      id: 'worst_area', 
-      label: 'الحد الأقصى للمساحة', 
-      desc: 'متوسط أكبر مساحات تم قياسها لأنوية الخلايا' 
-    },
-    { 
-      id: 'worst_concavity', 
-      label: 'الحد الأقصى للتقعر', 
-      desc: 'أقصى شدة أو عمق للتعرجات الغائرة في الغلاف النووي للخلية' 
-    }
+    { id: 'worst_radius', label: 'الحد الأقصى لنصف القطر', desc: 'متوسط أكبر ثلاث قيم لنصف قطر أنوية الخلايا المرصودة' },
+    { id: 'worst_texture', label: 'الحد الأقصى لتباين النسيج', desc: 'أقصى تباين في تدرج الألوان الرمادية لسطح النواة (مؤشر على خشونة السطح)' },
+    { id: 'worst_concave_points', label: 'الحد الأقصى للنقاط المقعرة', desc: 'أقصى عدد للتعرجات أو النقاط الغائرة على محيط النواة' },
+    { id: 'worst_area', label: 'الحد الأقصى للمساحة', desc: 'متوسط أكبر مساحات تم قياسها لأنوية الخلايا' },
+    { id: 'worst_concavity', label: 'الحد الأقصى للتقعر', desc: 'أقصى شدة أو عمق للتعرجات الغائرة في الغلاف النووي للخلية' }
   ],
   btnAnalyze: "تشغيل التحليل",
   btnLoading: "جاري معالجة البيانات...",
@@ -141,19 +122,42 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-900 text-slate-200 font-sans selection:bg-teal-500/30" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       
+      {/* Navbar with NEW NEURAL NETWORK LOGO */}
       <nav className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.2)]">
-              <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="18" cy="5" r="3" />
-                <circle cx="6" cy="12" r="3" />
-                <circle cx="18" cy="19" r="3" />
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+            
+            {/* NEW LOGO CONTAINER */}
+            <div className="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.2)] overflow-hidden p-1.5">
+              {/* Custom Neural Network SVG Icon */}
+              <svg viewBox="0 0 100 100" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Connections (Synapses) */}
+                <path d="M25 35 L50 20" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
+                <path d="M25 35 L50 50" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
+                <path d="M25 65 L50 50" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
+                <path d="M25 65 L50 80" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
+                <path d="M50 20 L75 50" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
+                <path d="M50 50 L75 50" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
+                <path d="M50 80 L75 50" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
+                
+                {/* Nodes (Neurons) - Input Layer */}
+                <circle cx="25" cy="35" r="8" fill="currentColor" className="animate-pulse"/>
+                <circle cx="25" cy="65" r="8" fill="currentColor" className="animate-pulse"/>
+                
+                {/* Nodes (Neurons) - Hidden Layer */}
+                <circle cx="50" cy="20" r="8" fill="#fff" stroke="currentColor" strokeWidth="2"/>
+                <circle cx="50" cy="50" r="8" fill="#fff" stroke="currentColor" strokeWidth="2"/>
+                <circle cx="50" cy="80" r="8" fill="#fff" stroke="currentColor" strokeWidth="2"/>
+                
+                {/* Nodes (Neurons) - Output Layer */}
+                <circle cx="75" cy="50" r="10" fill="currentColor" stroke="#fff" strokeWidth="3"/>
               </svg>
             </div>
-            <h1 className="text-xl font-bold tracking-wide text-slate-100">{content.brand}</h1>
+            
+            {/* Brand Name */}
+            <h1 className="text-2xl font-bold tracking-wide text-slate-100 flex items-baseline gap-1">
+              NeuroScan<span className="text-teal-400">.AI</span>
+            </h1>
           </div>
           
           <div className="flex items-center gap-4">
@@ -170,6 +174,7 @@ function App() {
         </div>
       </nav>
 
+      {/* Main Content (Rest of the code remains the same) */}
       <main className="max-w-7xl mx-auto px-6 py-12 lg:py-20">
         
         <div className="max-w-3xl mb-12">
@@ -200,6 +205,7 @@ function App() {
                           {field.desc}
                         </span>
                       </label>
+                      {/* Updated Input with appearance utilities to hide spin buttons */}
                       <input
                         type="number"
                         step="any"
@@ -256,6 +262,7 @@ function App() {
                 <h4 className="text-slate-300 font-bold mb-2">{content.awaiting}</h4>
                 <p className="text-slate-500 text-sm max-w-[250px]">
                   {content.awaitingDesc}
+                }
                 </p>
               </div>
             )}
