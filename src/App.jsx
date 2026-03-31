@@ -252,7 +252,7 @@ function App() {
                       dir="ltr"
                       value={formData[f.id]}
                       onChange={e => setFormData({...formData, [f.id]: e.target.value})}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all text-left rtl:text-right"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all text-left rtl:text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                 ))}
@@ -331,20 +331,20 @@ function App() {
         </div>
         <div className="grid sm:grid-cols-3 gap-4">
           <Tilt3D>
-            <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col items-center sm:items-start text-center sm:text-start gap-4 h-full">
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">{content.emailLabel}</div>
-              <div className="text-sm font-medium text-slate-200">hassanahmed07e9@gmailcom</div>
+            <div className="p-5 bg-slate-950 border border-slate-800 hover:border-teal-500/50 hover:shadow-[0_0_15px_rgba(20,184,166,0.1)] transition-all duration-300 rounded-2xl flex flex-col items-center sm:items-start text-center sm:text-start gap-4 h-full">
+              <div className="text-xs font-bold text-teal-500 uppercase tracking-widest mb-1">{content.emailLabel}</div>
+              <div className="text-sm font-medium text-slate-200">hassanahmed07.e9@gmail.com</div>
             </div>
           </Tilt3D>
           <Tilt3D>
-            <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col items-center sm:items-start text-center sm:text-start gap-4 h-full">
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">{content.linkedinLabel}</div>
-              <div className="text-sm font-medium text-slate-200">hassanahmed2007</div>
+            <div className="p-5 bg-slate-950 border border-slate-800 hover:border-teal-500/50 hover:shadow-[0_0_15px_rgba(20,184,166,0.1)] transition-all duration-300 rounded-2xl flex flex-col items-center sm:items-start text-center sm:text-start gap-4 h-full">
+              <div className="text-xs font-bold text-teal-500 uppercase tracking-widest mb-1">{content.linkedinLabel}</div>
+              <div className="text-sm font-medium text-slate-200">hassan-ahmed2007</div>
             </div>
           </Tilt3D>
           <Tilt3D>
-            <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col items-center sm:items-start text-center sm:text-start gap-4 h-full">
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">{content.githubLabel}</div>
+            <div className="p-5 bg-slate-950 border border-slate-800 hover:border-teal-500/50 hover:shadow-[0_0_15px_rgba(20,184,166,0.1)] transition-all duration-300 rounded-2xl flex flex-col items-center sm:items-start text-center sm:text-start gap-4 h-full">
+              <div className="text-xs font-bold text-teal-500 uppercase tracking-widest mb-1">{content.githubLabel}</div>
               <div className="text-sm font-medium text-slate-200">HassanAhmed2Ha</div>
             </div>
           </Tilt3D>
