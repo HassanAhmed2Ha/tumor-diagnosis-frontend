@@ -43,6 +43,7 @@ const Tilt3D = ({ children, className = '' }) => {
   )
 }
 
+// التعديل هنا لحل مشكلة القيم السالبة في العربي
 const ShapVisualizer = ({ values, lang, labels }) => {
   const maxVal = Math.max(...values.map(Math.abs), 0.1)
   
@@ -59,14 +60,15 @@ const ShapVisualizer = ({ values, lang, labels }) => {
       <div className="space-y-5">
         {values.map((val, index) => (
           <div key={index} className="relative">
-            <div className="flex justify-between text-[10px] mb-1.5 px-1 font-medium">
+            <div className={`flex justify-between text-[10px] mb-1.5 px-1 font-medium ${lang === 'ar' ? 'flex-row-reverse' : ''}`}>
               <span className="text-slate-400">{labels[index].label}</span>
-              <span className={val > 0 ? 'text-rose-400' : 'text-emerald-400'} dir="ltr">
-                {val > 0 ? '▲' : '▼'} {(Math.abs(val) * 100).toFixed(1)}%
+              {/* إجبار الرقم على اتجاه LTR دائماً لمنع انعكاس علامة السالب */}
+              <span className={val > 0 ? 'text-rose-400' : 'text-emerald-400'} style={{ direction: 'ltr', display: 'inline-block' }}>
+                {val > 0 ? '▲ +' : '▼ -'}{(Math.abs(val) * 100).toFixed(1)}%
               </span>
             </div>
             
-            <div className="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden flex items-center relative border border-slate-700/50">
+            <div className="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden flex items-center relative border border-slate-700/50" dir="ltr">
               <div className="absolute left-1/2 w-0.5 h-full bg-slate-600 z-10"></div>
               <motion.div
                 initial={{ width: 0, left: "50%" }}
@@ -297,8 +299,8 @@ function App() {
                       {result.prediction === 'Malignant' ? content.malignant : content.benign}
                     </h3>
                     <div className="space-y-2">
-                      <div className="flex justify-between text-xs font-bold uppercase"><span className="text-slate-400">{content.confidence}</span><span className="text-white">{(result.probability < 0.5 ? (1-result.probability)*100 : result.probability*100).toFixed(1)}%</span></div>
-                      <div className="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-700/50">
+                      <div className="flex justify-between text-xs font-bold uppercase"><span className="text-slate-400">{content.confidence}</span><span className="text-white" dir="ltr">{(result.probability < 0.5 ? (1-result.probability)*100 : result.probability*100).toFixed(1)}%</span></div>
+                      <div className="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-700/50" dir="ltr">
                         <motion.div initial={{ width: 0 }} animate={{ width: `${(result.probability < 0.5 ? (1-result.probability)*100 : result.probability*100)}%` }} transition={{ duration: 1.5 }} className={`h-full ${result.prediction === 'Malignant' ? 'bg-rose-500' : 'bg-emerald-500'}`} />
                       </div>
                     </div>
@@ -333,19 +335,19 @@ function App() {
           <Tilt3D>
             <div className="p-5 bg-slate-950 border border-slate-800 hover:border-teal-500/50 hover:shadow-[0_0_15px_rgba(20,184,166,0.1)] transition-all duration-300 rounded-2xl flex flex-col items-center sm:items-start text-center sm:text-start gap-4 h-full">
               <div className="text-xs font-bold text-teal-500 uppercase tracking-widest mb-1">{content.emailLabel}</div>
-              <div className="text-sm font-medium text-slate-200">hassanahmed07.e9@gmail.com</div>
+              <div className="text-sm font-medium text-slate-200" style={{ direction: 'ltr' }}>hassanahmed07.e9@gmail.com</div>
             </div>
           </Tilt3D>
           <Tilt3D>
             <div className="p-5 bg-slate-950 border border-slate-800 hover:border-teal-500/50 hover:shadow-[0_0_15px_rgba(20,184,166,0.1)] transition-all duration-300 rounded-2xl flex flex-col items-center sm:items-start text-center sm:text-start gap-4 h-full">
               <div className="text-xs font-bold text-teal-500 uppercase tracking-widest mb-1">{content.linkedinLabel}</div>
-              <div className="text-sm font-medium text-slate-200">hassan-ahmed2007</div>
+              <div className="text-sm font-medium text-slate-200" style={{ direction: 'ltr' }}>hassan-ahmed2007</div>
             </div>
           </Tilt3D>
           <Tilt3D>
             <div className="p-5 bg-slate-950 border border-slate-800 hover:border-teal-500/50 hover:shadow-[0_0_15px_rgba(20,184,166,0.1)] transition-all duration-300 rounded-2xl flex flex-col items-center sm:items-start text-center sm:text-start gap-4 h-full">
               <div className="text-xs font-bold text-teal-500 uppercase tracking-widest mb-1">{content.githubLabel}</div>
-              <div className="text-sm font-medium text-slate-200">HassanAhmed2Ha</div>
+              <div className="text-sm font-medium text-slate-200" style={{ direction: 'ltr' }}>HassanAhmed2Ha</div>
             </div>
           </Tilt3D>
         </div>
