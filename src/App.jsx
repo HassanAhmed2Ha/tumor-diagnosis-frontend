@@ -35,11 +35,31 @@ const contentAr = {
   heroDesc: "أدخل الخصائص السريرية لأنوية الخلايا بالأسفل يقوم نموذج التعلم العميق الخاص بنا بتحليل هذه المعلمات في الوقت الفعلي للمساعدة في تصنيف الأورام إلى حميدة أو خبيثة",
   inputsTitle: "المدخلات السريرية",
   fields: [
-    { id: 'worst_radius', label: 'أسوأ نصف قطر', desc: 'متوسط المسافات من المركز إلى النقاط على المحيط الخارجي للخلية' },
-    { id: 'worst_texture', label: 'أسوأ نسيج', desc: 'الانحراف المعياري لقيم التدرج الرمادي التي تعكس تباين سطح الخلية' },
-    { id: 'worst_concave_points', label: 'أسوأ نقاط مقعرة', desc: 'عدد الأجزاء المقعرة في محيط الخلية' },
-    { id: 'worst_area', label: 'أسوأ مساحة', desc: 'المساحة الإجمالية للخلية' },
-    { id: 'worst_concavity', label: 'أسوأ تقعر', desc: 'شدة وعمق الأجزاء المقعرة في الخلية' }
+    { 
+      id: 'worst_radius', 
+      label: 'الحد الأقصى لنصف القطر', 
+      desc: 'متوسط أكبر ثلاث قيم لنصف قطر أنوية الخلايا المرصودة' 
+    },
+    { 
+      id: 'worst_texture', 
+      label: 'الحد الأقصى لتباين النسيج', 
+      desc: 'أقصى تباين في تدرج الألوان الرمادية لسطح النواة (مؤشر على خشونة السطح)' 
+    },
+    { 
+      id: 'worst_concave_points', 
+      label: 'الحد الأقصى للنقاط المقعرة', 
+      desc: 'أقصى عدد للتعرجات أو النقاط الغائرة على محيط النواة' 
+    },
+    { 
+      id: 'worst_area', 
+      label: 'الحد الأقصى للمساحة', 
+      desc: 'متوسط أكبر مساحات تم قياسها لأنوية الخلايا' 
+    },
+    { 
+      id: 'worst_concavity', 
+      label: 'الحد الأقصى للتقعر', 
+      desc: 'أقصى شدة أو عمق للتعرجات الغائرة في الغلاف النووي للخلية' 
+    }
   ],
   btnAnalyze: "تشغيل التحليل",
   btnLoading: "جاري معالجة البيانات...",
@@ -186,8 +206,8 @@ function App() {
                         name={field.id}
                         value={formData[field.id]}
                         onChange={handleChange}
-                        placeholder="0.00"
-                        className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none transition-all shadow-inner"
+                        placeholder="0"
+                        className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-600 focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none transition-all shadow-inner [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         required
                       />
                     </div>
