@@ -1,106 +1,93 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'
 
-// قاموس اللغات الشامل مع التفسيرات الطبية
-const i18n = {
-  en: {
-    brand: "NeuroScan.AI",
-    badge: "Research & Diagnostic Tool",
-    heroTitle: "Breast Cancer Classification Engine",
-    heroDesc: "Enter the clinical cell nuclei features below. Our deep learning model analyzes these parameters in real-time to assist in classifying tumors.",
-    inputsTitle: "Clinical Inputs",
-    
-    // Labels
-    worstRadius: "Worst Radius",
-    worstTexture: "Worst Texture",
-    worstConcavePts: "Worst Concave Pts",
-    worstArea: "Worst Area",
-    worstConcavity: "Worst Concavity",
-    
-    // Medical Descriptions
-    worstRadiusDesc: "Mean of distances from center to points on perimeter for the largest cells.",
-    worstTextureDesc: "Standard deviation of gray-scale values, indicating surface roughness.",
-    worstConcavePtsDesc: "Number of concave portions (indentations) on the cell contour.",
-    worstAreaDesc: "Total cellular area of the most enlarged cells.",
-    worstConcavityDesc: "Severity and depth of concave portions in the cell membrane.",
-    
-    btnAnalyze: "Run Analysis",
-    btnLoading: "Processing Data...",
-    awaiting: "Awaiting Data",
-    awaitingDesc: "Fill in the required fields and run the analysis to view the AI prediction here.",
-    output: "Diagnostic Output",
-    confidence: "AI Confidence Level",
-    disclaimer: "This tool is a demonstration of AI capabilities and is not a substitute for professional medical advice, diagnosis, or treatment.",
-    errorMsg: "Connection failed. Please check your backend status.",
-    footer: "© 2026 NeuroScan AI. Developed by Hassan Ahmed for academic research.",
-    langBtn: "AR",
-    malignant: "Malignant",
-    benign: "Benign"
-  },
-  ar: {
-    brand: "NeuroScan.AI",
-    badge: "أداة بحث وتشخيص طبي",
-    heroTitle: "نظام تحليل أورام الثدي بالذكاء الاصطناعي",
-    heroDesc: "أدخل الخصائص السريرية لأنوية الخلايا بالأسفل. يقوم نموذج التعلم العميق الخاص بنا بتحليل هذه المعايير في الوقت الفعلي للمساعدة في تصنيف الأورام بدقة.",
-    inputsTitle: "البيانات السريرية للخلايا",
-    
-    // Labels
-    worstRadius: "أكبر نصف قطر (Worst Radius)",
-    worstTexture: "أكثر تباين نسيجي (Worst Texture)",
-    worstConcavePts: "أكثر نقاط مقعرة (Worst Concave Pts)",
-    worstArea: "أكبر مساحة خلوية (Worst Area)",
-    worstConcavity: "أشد تقعر (Worst Concavity)",
-    
-    // Medical Descriptions (التعريف الطبي الدقيق)
-    worstRadiusDesc: "متوسط أكبر مسافات من مركز الخلية إلى محيطها الخارجي، يعكس حجم التضخم الخلوي.",
-    worstTextureDesc: "التباين والانحراف المعياري لدرجات التدرج الرمادي، يعكس مدى خشونة أو تشوه سطح الخلية.",
-    worstConcavePtsDesc: "عدد النقاط الغائرة (المقعرة) على محيط غلاف الخلية، ترتبط عادة بالخلايا السرطانية.",
-    worstAreaDesc: "إجمالي المساحة التي تشغلها أكبر الخلايا حجماً في العينة المسحوبة.",
-    worstConcavityDesc: "مدى عمق وشدة التقعرات في الغلاف الخلوي، الخلية غير المنتظمة دليل خطر.",
-    
-    btnAnalyze: "بدء التحليل واستخراج النتيجة",
-    btnLoading: "جاري معالجة البيانات بالذكاء الاصطناعي...",
-    awaiting: "في انتظار إدخال البيانات",
-    awaitingDesc: "قم بتعبئة الحقول السريرية المطلوبة واضغط على زر التحليل لعرض التقرير التشخيصي هنا.",
-    output: "التقرير التشخيصي",
-    confidence: "مستوى ثقة الذكاء الاصطناعي",
-    disclaimer: "هذه الأداة هي نموذج تجريبي لقدرات الذكاء الاصطناعي في المجال الطبي، ولا تغني بأي شكل عن الاستشارة الطبية المتخصصة والتشخيص المعتمد.",
-    errorMsg: "فشل الاتصال بالخادم. يرجى التأكد من عمل الباك إند.",
-    footer: "© 2026 NeuroScan AI. تم التطوير بواسطة حسن أحمد لأغراض البحث الأكاديمي لمشروع التخرج.",
-    langBtn: "EN",
-    malignant: "خبيث (Malignant)",
-    benign: "حميد (Benign)"
-  }
-};
+const contentEn = {
+  brand: "NeuroScan.AI",
+  badge: "Research & Diagnostic Tool",
+  langBtn: "AR",
+  heroTitle: "Breast Cancer Classification Engine",
+  heroDesc: "Enter the clinical cell nuclei features below Our deep learning model analyzes these parameters in real-time to assist in classifying tumors as Benign or Malignant",
+  inputsTitle: "Clinical Inputs",
+  fields: [
+    { id: 'worst_radius', label: 'Worst Radius', desc: 'Mean of distances from center to points on perimeter' },
+    { id: 'worst_texture', label: 'Worst Texture', desc: 'Standard deviation of gray-scale values' },
+    { id: 'worst_concave_points', label: 'Worst Concave Pts', desc: 'Number of concave portions of the contour' },
+    { id: 'worst_area', label: 'Worst Area', desc: 'Total cellular area' },
+    { id: 'worst_concavity', label: 'Worst Concavity', desc: 'Severity of concave portions' }
+  ],
+  btnAnalyze: "Run Analysis",
+  btnLoading: "Processing Data...",
+  awaiting: "Awaiting Data",
+  awaitingDesc: "Fill in the required fields and run the analysis to view the AI prediction here",
+  output: "Diagnostic Output",
+  malignant: "Malignant",
+  benign: "Benign",
+  confidence: "AI Confidence Level",
+  disclaimer: "Disclaimer This tool is a demonstration of AI capabilities and is not a substitute for professional medical advice diagnosis or treatment",
+  errorMsg: "Connection failed Please check your backend status",
+  footer: "2026 NeuroScan AI Developed by Hassan Ahmed for academic research"
+}
+
+const contentAr = {
+  brand: "NeuroScan.AI",
+  badge: "أداة بحث وتشخيص",
+  langBtn: "EN",
+  heroTitle: "محرك تصنيف أورام الثدي",
+  heroDesc: "أدخل الخصائص السريرية لأنوية الخلايا بالأسفل يقوم نموذج التعلم العميق الخاص بنا بتحليل هذه المعلمات في الوقت الفعلي للمساعدة في تصنيف الأورام إلى حميدة أو خبيثة",
+  inputsTitle: "المدخلات السريرية",
+  fields: [
+    { id: 'worst_radius', label: 'أسوأ نصف قطر', desc: 'متوسط المسافات من المركز إلى النقاط على المحيط الخارجي للخلية' },
+    { id: 'worst_texture', label: 'أسوأ نسيج', desc: 'الانحراف المعياري لقيم التدرج الرمادي التي تعكس تباين سطح الخلية' },
+    { id: 'worst_concave_points', label: 'أسوأ نقاط مقعرة', desc: 'عدد الأجزاء المقعرة في محيط الخلية' },
+    { id: 'worst_area', label: 'أسوأ مساحة', desc: 'المساحة الإجمالية للخلية' },
+    { id: 'worst_concavity', label: 'أسوأ تقعر', desc: 'شدة وعمق الأجزاء المقعرة في الخلية' }
+  ],
+  btnAnalyze: "تشغيل التحليل",
+  btnLoading: "جاري معالجة البيانات...",
+  awaiting: "في انتظار البيانات",
+  awaitingDesc: "قم بملء الحقول المطلوبة وتشغيل التحليل لعرض تنبؤ الذكاء الاصطناعي هنا",
+  output: "نتيجة التشخيص",
+  malignant: "خبيث",
+  benign: "حميد",
+  confidence: "مستوى ثقة الذكاء الاصطناعي",
+  disclaimer: "تنبيه هذه الأداة هي عرض لقدرات الذكاء الاصطناعي وليست بديلا عن الاستشارة الطبية المتخصصة أو التشخيص أو العلاج",
+  errorMsg: "فشل الاتصال يرجى التحقق من حالة الخادم الخاص بك",
+  footer: "2026 NeuroScan AI تم التطوير بواسطة حسن أحمد للبحث الأكاديمي"
+}
 
 function App() {
-  const [lang, setLang] = useState('ar'); // خليت العربي هو اللغة الافتراضية
-  const t = i18n[lang];
-
+  const [lang, setLang] = useState('en')
+  const [content, setContent] = useState(contentEn)
+  
   const [formData, setFormData] = useState({
     worst_radius: '',
     worst_texture: '',
     worst_concave_points: '',
     worst_area: '',
     worst_concavity: ''
-  });
+  })
 
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [result, setResult] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    setContent(lang === 'en' ? contentEn : contentAr)
+    document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl'
+  }, [lang])
 
   const toggleLang = () => {
-    setLang(lang === 'en' ? 'ar' : 'en');
-  };
+    setLang(lang === 'en' ? 'ar' : 'en')
+  }
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
 
   const analyzeData = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setResult(null);
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    setResult(null)
 
     try {
       const response = await fetch('https://hassan2007-tumor-diagnosis-backend.hf.space/predict', {
@@ -113,33 +100,31 @@ function App() {
           worst_area: parseFloat(formData.worst_area),
           worst_concavity: parseFloat(formData.worst_concavity)
         }),
-      });
+      })
 
-      if (!response.ok) throw new Error(t.errorMsg);
+      if (!response.ok) throw new Error(content.errorMsg)
       
-      const data = await response.json();
-      setResult(data);
+      const data = await response.json()
+      setResult(data)
     } catch (err) {
-      setError(t.errorMsg);
+      setError(content.errorMsg)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const getConfidenceScore = (prediction, probability) => {
-    const rawScore = prediction === 'Malignant' ? (1 - probability) : probability;
-    return (rawScore * 100).toFixed(1);
-  };
+    const rawScore = prediction === 'Malignant' ? (1 - probability) : probability
+    return (rawScore * 100).toFixed(1)
+  }
 
   return (
-    // تغيير اتجاه الصفحة بالكامل بناءً على اللغة (RTL للعربي و LTR للإنجليزي)
     <div className="min-h-screen bg-slate-900 text-slate-200 font-sans selection:bg-teal-500/30" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       
       <nav className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.2)]">
-              {/* أيقونة تعبر عن الشبكات العصبية والخلايا */}
               <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="18" cy="5" r="3" />
                 <circle cx="6" cy="12" r="3" />
@@ -148,18 +133,18 @@ function App() {
                 <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
               </svg>
             </div>
-            <h1 className="text-xl font-bold tracking-wide text-slate-100">{t.brand}</h1>
+            <h1 className="text-xl font-bold tracking-wide text-slate-100">{content.brand}</h1>
           </div>
           
           <div className="flex items-center gap-4">
             <div className="hidden md:block text-xs font-medium px-3 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
-              {t.badge}
+              {content.badge}
             </div>
             <button 
               onClick={toggleLang}
               className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-400 border border-slate-700 transition font-bold text-sm tracking-wider"
             >
-              {t.langBtn}
+              {content.langBtn}
             </button>
           </div>
         </div>
@@ -169,10 +154,10 @@ function App() {
         
         <div className="max-w-3xl mb-12">
           <h2 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight text-white">
-            {t.heroTitle}
+            {content.heroTitle}
           </h2>
           <p className="text-slate-400 text-lg leading-relaxed">
-            {t.heroDesc}
+            {content.heroDesc}
           </p>
         </div>
 
@@ -181,25 +166,17 @@ function App() {
           <div className="lg:col-span-7">
             <div className="bg-slate-800/50 border border-slate-700 rounded-3xl p-8 backdrop-blur-sm shadow-xl">
               <h3 className="text-xl font-bold mb-6 text-slate-200 border-b border-slate-700 pb-4">
-                {t.inputsTitle}
+                {content.inputsTitle}
               </h3>
               
               <form onSubmit={analyzeData} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   
-                  {/* دمجنا الحقول مع الشرح الطبي بتاعها من القاموس */}
-                  {[
-                    { id: 'worst_radius', label: t.worstRadius, desc: t.worstRadiusDesc },
-                    { id: 'worst_texture', label: t.worstTexture, desc: t.worstTextureDesc },
-                    { id: 'worst_concave_points', label: t.worstConcavePts, desc: t.worstConcavePtsDesc },
-                    { id: 'worst_area', label: t.worstArea, desc: t.worstAreaDesc },
-                    { id: 'worst_concavity', label: t.worstConcavity, desc: t.worstConcavityDesc }
-                  ].map((field) => (
-                    <div key={field.id} className="group relative">
-                      <label className="text-sm font-semibold text-slate-300 block mb-1.5 flex justify-between items-baseline cursor-help">
-                        {field.label}
-                        {/* الشرح بيظهر لما تقف بالماوس */}
-                        <span className={`absolute ${lang === 'ar' ? 'right-0' : 'left-0'} -top-10 w-full bg-slate-700 text-xs text-white p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg`}>
+                  {content.fields.map((field) => (
+                    <div key={field.id} className="group">
+                      <label className="text-sm font-semibold text-slate-300 block mb-1.5 flex flex-col items-start">
+                        <span>{field.label}</span>
+                        <span className="text-[10px] text-slate-500 font-normal opacity-0 group-hover:opacity-100 transition-opacity mt-1">
                           {field.desc}
                         </span>
                       </label>
@@ -231,9 +208,9 @@ function App() {
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
-                          {t.btnLoading}
+                          {content.btnLoading}
                         </>
-                      ) : t.btnAnalyze}
+                      ) : content.btnAnalyze}
                     </span>
                   </button>
                 </div>
@@ -256,32 +233,32 @@ function App() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                   </svg>
                 </div>
-                <h4 className="text-slate-300 font-bold mb-2">{t.awaiting}</h4>
-                <p className="text-slate-500 text-sm max-w-[250px] mx-auto">
-                  {t.awaitingDesc}
+                <h4 className="text-slate-300 font-bold mb-2">{content.awaiting}</h4>
+                <p className="text-slate-500 text-sm max-w-[250px]">
+                  {content.awaitingDesc}
                 </p>
               </div>
             )}
 
             {result && (
               <div className="bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-                <div className={`absolute -top-20 ${lang === 'ar' ? '-left-20' : '-right-20'} w-40 h-40 blur-[80px] rounded-full ${result.prediction === 'Malignant' ? 'bg-rose-500/30' : 'bg-emerald-500/30'}`}></div>
+                <div className={`absolute -top-20 -right-20 w-40 h-40 blur-[80px] rounded-full ${result.prediction === 'Malignant' ? 'bg-rose-500/30' : 'bg-emerald-500/30'}`}></div>
 
                 <div className="relative z-10">
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">{t.output}</div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">{content.output}</div>
                   <div className="flex items-baseline gap-3 mb-6">
                     <h3 className={`text-4xl font-black ${result.prediction === 'Malignant' ? 'text-rose-400' : 'text-emerald-400'}`}>
-                      {result.prediction === 'Malignant' ? t.malignant : t.benign}
+                      {result.prediction === 'Malignant' ? content.malignant : content.benign}
                     </h3>
                   </div>
 
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-400">{t.confidence}</span>
+                      <span className="text-slate-400">{content.confidence}</span>
                       <span className="text-white font-bold">{getConfidenceScore(result.prediction, result.probability)}%</span>
                     </div>
                     
-                    <div className="w-full bg-slate-900 rounded-full h-3 overflow-hidden border border-slate-700" dir="ltr">
+                    <div className="w-full bg-slate-900 rounded-full h-3 overflow-hidden border border-slate-700">
                       <div 
                         className={`h-full transition-all duration-1500 ease-out rounded-full ${result.prediction === 'Malignant' ? 'bg-gradient-to-r from-rose-600 to-rose-400' : 'bg-gradient-to-r from-emerald-600 to-emerald-400'}`}
                         style={{ width: `${getConfidenceScore(result.prediction, result.probability)}%` }}
@@ -291,7 +268,7 @@ function App() {
 
                   <div className="mt-8 pt-6 border-t border-slate-700">
                     <p className="text-xs text-slate-500 leading-relaxed">
-                      <span className="text-amber-500 font-semibold">تنبيه: </span> {t.disclaimer}
+                      {content.disclaimer}
                     </p>
                   </div>
                 </div>
@@ -303,10 +280,10 @@ function App() {
       </main>
 
       <footer className="py-8 text-center border-t border-slate-800 text-slate-600 text-sm">
-        <p>{t.footer}</p>
+        <p>{content.footer}</p>
       </footer>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
