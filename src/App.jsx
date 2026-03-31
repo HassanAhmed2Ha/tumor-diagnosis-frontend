@@ -160,6 +160,7 @@ function App() {
   const [formData, setFormData] = useState({ worst_radius: '', worst_texture: '', worst_concave_points: '', worst_area: '', worst_concavity: '' })
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [progress, setProgress] = useState(0)
 
   useEffect(() => {
     setContent(lang === 'en' ? contentEn : contentAr)
@@ -170,6 +171,15 @@ function App() {
     e.preventDefault()
     setLoading(true)
     setResult(null)
+    setProgress(0)
+
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 90) return 90
+        return prev + Math.floor(Math.random() * 12) + 3
+      })
+    }, 150)
+
     try {
       const response = await fetch('https://hassan2007-tumor-diagnosis-backend.hf.space/predict', {
         method: 'POST',
@@ -183,11 +193,18 @@ function App() {
         }),
       })
       const data = await response.json()
-      setResult(data)
+      clearInterval(interval)
+      setProgress(100)
+      
+      setTimeout(() => {
+        setResult(data)
+        setLoading(false)
+      }, 500)
+      
     } catch (err) {
-      alert("Error connecting to AI Server")
-    } finally {
+      clearInterval(interval)
       setLoading(false)
+      alert("Error connecting to AI Server")
     }
   }
 
@@ -232,9 +249,10 @@ function App() {
                     <label className="text-[11px] font-bold text-slate-500 uppercase mb-1 block group-hover:text-teal-400 transition-colors">{f.label}</label>
                     <input
                       type="number" step="any" required
+                      dir="ltr"
                       value={formData[f.id]}
                       onChange={e => setFormData({...formData, [f.id]: e.target.value})}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all text-left rtl:text-right"
                     />
                   </div>
                 ))}
@@ -248,10 +266,25 @@ function App() {
 
         <aside className="lg:sticky top-28">
           <AnimatePresence mode="wait">
-            {!result ? (
-              <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-[400px] border-2 border-dashed border-slate-800/80 bg-slate-900/30 rounded-3xl flex flex-col items-center justify-center text-center p-10 backdrop-blur-sm">
+            {!result && !loading ? (
+              <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-[400px] border-2 border-dashed border-slate-800/80 bg-slate-900/30 rounded-3xl flex flex-col items-center justify-center text-center p-10 backdrop-blur-sm">
                 <div className="w-16 h-16 bg-slate-950 rounded-full flex items-center justify-center mb-4 text-slate-700 border border-slate-800">
                   <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" /></svg>
+                </div>
+              </motion.div>
+            ) : loading ? (
+              <motion.div key="loading" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="h-[400px] border border-slate-700 bg-slate-900/80 rounded-3xl flex flex-col items-center justify-center text-center p-10 backdrop-blur-xl relative overflow-hidden shadow-2xl">
+                <motion.div animate={{ top: ['0%', '100%', '0%'] }} transition={{ repeat: Infinity, duration: 2.5, ease: "linear" }} className="absolute left-0 right-0 h-1 bg-teal-500/50 shadow-[0_0_20px_rgba(20,184,166,0.8)] z-0" />
+                <div className="relative z-10 w-full max-w-xs flex flex-col items-center">
+                  <div className="text-[10px] font-bold uppercase text-teal-400 mb-4 tracking-widest">
+                    {lang === 'en' ? 'Scanning Clinical Parameters' : 'جاري فحص المعلمات السريرية'}
+                  </div>
+                  <div className="text-6xl font-black text-white mb-8 font-mono tracking-tighter">
+                    {progress}%
+                  </div>
+                  <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                    <motion.div className="h-full bg-gradient-to-r from-teal-600 to-teal-400" initial={{ width: 0 }} animate={{ width: `${progress}%` }} />
+                  </div>
                 </div>
               </motion.div>
             ) : (
